@@ -37,32 +37,35 @@ kubectl create -f provisioner.yaml
 ```
 
 ```yaml
+apiVersion: apps/v1
 kind: Deployment
-apiVersion: extensions/v1beta1
 metadata:
   name: aws-efs-provisioner
   namespace: kube-system
 spec:
+  selector:
+    matchLabels:
+      application: aws-efs-provisioner
   replicas: 1
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: aws-efs-provisioner
+        application: aws-efs-provisioner
     spec:
       containers:
-        - name: aws-efs-provisioner
-          image: previousnext/k8s-aws-efs:2.0.0
-          env:
-            - name:  EFS_PERFORMANCE
-              value: "generalPurpose"
-            - name:  AWS_REGION
-              value: "ap-southeast-2"
-            - name:  AWS_SECURITY_GROUP
-              value: "sg-xxxxxxxxx"
-            - name:  AWS_SUBNETS
-              value: "subnet-xxxxxx,subnet-xxxxxx"
+      - name: aws-efs-provisioner
+        image: previousnext/k8s-aws-efs:2.0.0
+        env:
+        - name:  EFS_PERFORMANCE
+          value: "generalPurpose"
+        - name:  AWS_REGION
+          value: "ap-southeast-2"
+        - name:  AWS_SECURITY_GROUP
+          value: "sg-xxxxxxxxx"
+        - name:  AWS_SUBNETS
+          value: "subnet-xxxxxx,subnet-xxxxxx"
 ```
 
 **Register our provisioner as a Storage Class**
