@@ -68,6 +68,48 @@ spec:
           value: "subnet-xxxxxx,subnet-xxxxxx"
 ```
 
+Additional cluster permissions are also required for the provisioner to operate. Create a cluster role and binding as follows:
+
+```bash
+kubectl create -f provisioner-role.yml
+```
+
+```yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aws-efs-provisioner
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumes"]
+  verbs: ["get", "list", "watch", "create", "delete"]
+- apiGroups: [""]
+  resources: ["persistentvolumeclaims"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: ["storage.k8s.io"]
+  resources: ["storageclasses"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["list", "watch", "create", "update", "patch"]
+- apiGroups: [""]
+  resources: ["endpoints"]
+  verbs: ["get", "list", "watch", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aws-efs-provisioner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aws-efs-provisioner
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: kube-system
+```
+
 **Register our provisioner as a Storage Class**
 
 Now we are going to register our storage class, this is way for us to map an "identifer" to our provsioner.
